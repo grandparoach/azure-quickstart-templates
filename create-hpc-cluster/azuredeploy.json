@@ -244,7 +244,7 @@
     "computeNodeImageOffer": "WindowsServerHPCPack",
     "computeNodeImageSku": "[variables('availableCNImageSkus')[parameters('computeNodeImage')]]",
     "adminBase64Password": "[base64(parameters('adminPassword'))]",
-    "customScriptLocation": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/create-hpc-cluster/",
+    "customScriptLocation": "https://raw.githubusercontent.com/grandparoach/azure-quickstart-templates/master/create-hpc-cluster/",
     "iaasInfoArg": "[concat('-SubscriptionId ', subscription().subscriptionId, ' -VNet ', variables('virtualNetworkName'), ' -Subnet ', variables('subnet1Name'), ' -Location \"', variables('location'), '\"')]",
     "headNodeCommandStr": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File PrepareHN.ps1 -DomainFQDN ', parameters('privateDomainName'), ' -AdminUserName ', parameters('adminUsername'), ' -AdminBase64Password \"', variables('adminBase64Password'), '\" -CNSize ', parameters('computeNodeVMSize'), ' -PostConfigScript \"', parameters('headNodePostConfigScript'), '\" ', variables('iaasInfoArg'))]",
     "hnStorageConnStrPrefix": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('hnStorageAccountName'), ';AccountKey=')]"
