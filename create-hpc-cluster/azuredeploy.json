@@ -190,14 +190,8 @@
     "storageAccountIndexWidth": "[length(string(sub(add(variables('cnStorageAccountNumber'), variables('cnStorageAccountIndexOffset')), 1)))]",
     "hnStorageAccountName": "[concat(variables('storageAccountNamePrefix'), padLeft('0', variables('storageAccountIndexWidth'), '0'))]",
     "hnStorageAccountId": "[resourceId('Microsoft.Storage/storageAccounts',variables('hnStorageAccountName'))]",
-    "addressPrefix": "10.0.0.0/16",
-    "subnet1Name": "Subnet-1",
-    "subnet1Prefix": "10.0.0.0/22",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
-    "publicIPAddressType": "Dynamic",
-    "publicIPAddressName": "[concat(parameters('clusterName'), '-PublicIP-VM')]",
-    "publicIPAddressNameHN": "[concat(variables('publicIPAddressName'),'-HN')]",
+    "vnetID": "[resourceId(parameters('existingVNetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingVNetName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/', parameters('existingSubnetName'))]",
     "availabilitySetName": "[concat(parameters('clusterName'), 'AVSet')]",
     "dnsName": "[concat(parameters('clusterName'), 'ep')]",
     "nicName": "[concat(parameters('clusterName'),'-nic')]",
@@ -282,55 +276,17 @@
     },
     {
       "apiVersion": "[variables('apiVersion')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[variables('virtualNetworkName')]",
-      "location": "[variables('location')]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
-        },
-        "subnets": [
-          {
-            "name": "[variables('subnet1Name')]",
-            "properties": {
-              "addressPrefix": "[variables('subnet1Prefix')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion')]",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressNameHN')]",
-      "location": "[variables('location')]",
-      "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-        "dnsSettings": {
-          "domainNameLabel": "[toLower(parameters('clusterName'))]"
-        }
-      }
-    },
-    {
-      "apiVersion": "[variables('apiVersion')]",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicNameHN')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressNameHN'))]"
       ],
       "properties": {
         "ipConfigurations": [
           {
             "name": "IPConfig",
             "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "10.0.0.4",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameHN'))]"
-              },
+              "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('subnetRef')]"
               }
@@ -339,7 +295,6 @@
         ]
       }
     },
-
     {
       "apiVersion": "2015-01-01",
       "type": "Microsoft.Resources/deployments",
