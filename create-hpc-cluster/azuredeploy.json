@@ -155,6 +155,27 @@
       "metadata": {
         "description": "Optional, specify the http/https url of the PowerShell script you want to run on the head node after it is configured. The script url must be public available, and you can also specify arguments for the script, for example 'http://www.consto.com/mypostscript.ps1 -Arg1 arg1 -Arg2 arg2'."
       }
+    },
+    "existingVNetName": {
+      "type": "string",
+      "defaultValue": "ARMHPCVNet",
+      "metadata": {
+        "description": "name of existing Virtual Network"
+      }
+    },
+    "existingVNetResourceGroup": {
+      "type": "string",
+       "defaultValue": "ARMHPC",
+      "metadata": {
+        "description": "name of Resource Group for existing Virtual Network"
+      }
+    },
+    "existingSubnetName": {
+      "type": "string",
+      "defaultValue": "Subnet-2",
+      "metadata": {
+        "description": "name of existing Virtual Network"
+      }
     }
   },
   "variables": {
