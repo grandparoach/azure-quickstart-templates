@@ -372,48 +372,7 @@
       }
     },
 
-    {
-      "apiVersion": "2015-01-01",
-      "type": "Microsoft.Resources/deployments",
-      "name": "updateVNetDNS",
-      "dependsOn": [
-        "Microsoft.Resources/deployments/createHeadNode"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(variables('customScriptLocation'),'vnet-with-dns-server.json')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "apiVersion": {
-            "value": "[variables('apiVersion')]"
-          },
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "virtualNetworkName": {
-            "value": "[variables('virtualNetworkName')]"
-          },
-          "virtualNetworkAddressRange": {
-            "value": "[variables('addressPrefix')]"
-          },
-          "subnetName": {
-            "value": "[variables('subnet1Name')]"
-          },
-          "subnetRange": {
-            "value": "[variables('subnet1Prefix')]"
-          },
-          "DNSServerAddress": {
-            "value": [
-              "10.0.0.4",
-              "8.8.8.8"
-            ]
-          }
-        }
-      }
-    },
-
+    
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('clusterName'),'/configureHeadNode')]",
@@ -460,7 +419,6 @@
       "name": "[concat('create', parameters('computeNodeNamePrefix'), padLeft(string(copyIndex()), 3, '0'))]",
       "dependsOn": [
         "Microsoft.Resources/deployments/createAvailabilitySet",
-        "Microsoft.Resources/deployments/updateVNetDNS",
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountNamePrefix'), padLeft(string(add(mod(copyIndex(), variables('cnStorageAccountNumber')), variables('cnStorageAccountIndexOffset'))), variables('storageAccountIndexWidth'), '0'))]"
       ],
       "copy": {
@@ -528,12 +486,6 @@
         }
       }
     }
-  ],
-   "outputs": {
-     "clusterDnsName": {
-       "type": "string",
-       "value": "[reference(variables('publicIPAddressNameHN')).dnsSettings.fqdn]"
-     }
-   }
+  ]
 }
 
