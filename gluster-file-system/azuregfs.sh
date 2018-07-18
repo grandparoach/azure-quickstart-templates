@@ -288,7 +288,7 @@ allow_passwordssh
 
     configure_network
     configure_disks
-    #configure_gluster
+    configure_gluster
 
 
 
