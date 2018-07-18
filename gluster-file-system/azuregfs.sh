@@ -175,7 +175,7 @@ install_glusterfs_centos() {
         #yum -y update
     fi
 
-    yum install psmisc
+    yum -y install psmisc
 
     echo "installing gluster"
     wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-libs-4.1.1-1.el7.x86_64.rpm
