@@ -4,7 +4,7 @@
   "parameters": {
     "hostOs": {
       "type": "string",
-      "defaultValue": "CentOS_7.4",
+      "defaultValue": "RHEL_7.4",
       "allowedValues": [
         "CentOS_7.4",
         "RHEL_7.4"
@@ -28,21 +28,21 @@
     },
     "existingVNetName": {
       "type": "string",
-      "defaultValue": "westus2VNet",
+      "defaultValue": "ARMHPCVNet",
       "metadata": {
         "description": "name of existing Virtual Network"
       }
     },
     "existingVNetResourceGroup": {
       "type": "string",
-      "defaultValue": "westus2",
+      "defaultValue": "ARMHPC",
       "metadata": {
         "description": "name of Resource Group for existing Virtual Network"
       }
     },
     "existingSubnetName": {
       "type": "string",
-      "defaultValue": "default",
+      "defaultValue": "Subnet-2",
       "metadata": {
         "description": "name of existing Virtual Network"
       }
@@ -80,7 +80,7 @@
     },
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_E8s_v3",
+      "defaultValue": "Standard_E64s_v3",
       "allowedValues": [
         "Standard_DS3_v2",
         "Standard_DS4_v2",
@@ -189,7 +189,7 @@
           "https://raw.githubusercontent.com/grandparoach/azure-quickstart-templates/gluster/gluster-file-system/azuregfs.sh"
         ],
         "commandToExecute": "[concat('bash azuregfs.sh ')]"
-    }    
+    } 
   },
   "resources": [
     {
@@ -314,7 +314,7 @@
       "location": "[resourceGroup().location]",
       "copy": {
         "name": "gfs-extention",
-        "count": "[parameters('scaleNumber')]"
+        "count": "[sub(parameters('scaleNumber'),1)]"
       },
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'), copyindex(1))]"
@@ -329,6 +329,32 @@
           },
           "protectedSettings": {
             "commandToExecute": "[concat('bash azuregfs.sh ', parameters('vmNamePrefix'), ' ', parameters('volumeName'), ' ', copyindex(1), ' ', parameters('scaleNumber'))]"  
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmNamePrefix'), parameters('scaleNumber'), '/extension')]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "copy": {
+        "name": "gfs-extention",
+        "count": "[parameters('scaleNumber')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'), parameters('scaleNumber'))]",
+        "gfs-extention"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+            "fileUris": "[variables('glusterScripts').scriptsToDownload]"
+          },
+          "protectedSettings": {
+            "commandToExecute": "[concat('bash azuregfs.sh ', parameters('vmNamePrefix'), ' ', parameters('volumeName'), ' ', parameters('scaleNumber'), ' ', parameters('scaleNumber'))]"  
         }
       }
     }
