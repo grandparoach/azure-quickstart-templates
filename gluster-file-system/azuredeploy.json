@@ -253,9 +253,13 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'), copyindex(1))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('DiagSAName'))]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('DiagSAName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('AvailabilitySetSettings').name)]"
       ],
       "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('AvailabilitySetSettings').name)]"
+        },  
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
         },
