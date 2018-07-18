@@ -225,7 +225,7 @@ configure_gluster() {
         mkdir "${GLUSTERDIR}"
     fi
 
-    if [ $NODEINDEX -lt $(($NODECOUNT-1)) ];
+    if [ $NODEINDEX -lt $(($NODECOUNT)) ];
     then
         return
     fi
@@ -237,7 +237,7 @@ configure_gluster() {
         failed=0
         index=1
         echo retrying $retry >> /tmp/error
-        while [ $index -lt $(($NODECOUNT-1)) ]; do
+        while [ $index -lt $(($NODECOUNT)) ]; do
             ping -c 3 "${PEERNODEPREFIX}${index}" > /tmp/error
             gluster peer probe "${PEERNODEPREFIX}${index}" >> /tmp/error
             if [ ${?} -ne 0 ];
@@ -261,8 +261,10 @@ configure_gluster() {
         let retry--
     done
 
-    sleep 60
-    echo "y" | gluster volume create ${VOLUMENAME} rep 2 transport tcp ${allNodes} 2>> /tmp/error
+    gluster volume create ${VOLUMENAME} rep 2 transport tcp ${allNodes} 2>> /tmp/error << EOF
+y
+EOF
+    
     gluster volume info 2>> /tmp/error
     gluster volume start ${VOLUMENAME} 2>> /tmp/error
 }
@@ -289,7 +291,6 @@ allow_passwordssh
     configure_network
     configure_disks
     configure_gluster
-
 
 
 
