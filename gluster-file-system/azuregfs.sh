@@ -172,18 +172,27 @@ install_glusterfs_centos() {
         wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
         rpm -Uvh ./epel-release-latest-7*.rpm
         rm ./epel-release-latest-7*.rpm
-        yum -y update
+        #yum -y update
     fi
-    
+
+    yum install psmisc
+
     echo "installing gluster"
+    wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-libs-4.1.1-1.el7.x86_64.rpm
+    rpm -i glusterfs-libs-4.1.1-1.el7.x86_64.rpm
     wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-4.1.1-1.el7.x86_64.rpm
     rpm -i glusterfs-4.1.1-1.el7.x86_64.rpm
     wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-cli-4.1.1-1.el7.x86_64.rpm
     rpm -i glusterfs-cli-4.1.1-1.el7.x86_64.rpm
-    wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-server-4.1.1-1.el7.x86_64.rpm
-    rpm -i glusterfs-server-4.1.1-1.el7.x86_64.rpm
+    wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-client-xlators-4.1.1-1.el7.x86_64.rpm
+    rpm -i glusterfs-client-xlators-4.1.1-1.el7.x86_64.rpm
+    wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-api-4.1.1-1.el7.x86_64.rpm
+    rpm -i glusterfs-api-4.1.1-1.el7.x86_64.rpm
     wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-fuse-4.1.1-1.el7.x86_64.rpm
     rpm -i glusterfs-fuse-4.1.1-1.el7.x86_64.rpm
+    wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-server-4.1.1-1.el7.x86_64.rpm
+    rpm -i glusterfs-server-4.1.1-1.el7.x86_64.rpm
+    
    
     #mv glusterfs-epel.repo  /etc/yum.repos.d/
     #yum -y update
