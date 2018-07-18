@@ -171,7 +171,7 @@ install_glusterfs_centos() {
         echo "Installing extra packages for enterprise linux"
         wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
         rpm -Uvh ./epel-release-latest-7*.rpm
-        rm ./epel-release-latest-7*.rpm
+        rm -f ./epel-release-latest-7*.rpm
         #yum -y update
     fi
 
@@ -235,7 +235,7 @@ configure_gluster() {
     failed=1
     while [ $retry -gt 0 ] && [ $failed -gt 0 ]; do
         failed=0
-        index=0
+        index=1
         echo retrying $retry >> /tmp/error
         while [ $index -lt $(($NODECOUNT-1)) ]; do
             ping -c 3 "${PEERNODEPREFIX}${index}" > /tmp/error
@@ -262,7 +262,7 @@ configure_gluster() {
     done
 
     sleep 60
-    gluster volume create ${VOLUMENAME} rep 2 transport tcp ${allNodes} 2>> /tmp/error
+    echo "y" | gluster volume create ${VOLUMENAME} rep 2 transport tcp ${allNodes} 2>> /tmp/error
     gluster volume info 2>> /tmp/error
     gluster volume start ${VOLUMENAME} 2>> /tmp/error
 }
@@ -289,6 +289,7 @@ allow_passwordssh
     configure_network
     configure_disks
     configure_gluster
+
 
 
 
