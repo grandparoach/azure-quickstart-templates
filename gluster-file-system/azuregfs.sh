@@ -176,10 +176,18 @@ install_glusterfs_centos() {
     fi
     
     echo "installing gluster"
-    wget --no-cache http://download.gluster.org/pub/gluster/glusterfs/LATEST/EPEL.repo/glusterfs-epel.repo
-    mv glusterfs-epel.repo  /etc/yum.repos.d/
-    yum -y update
-    yum -y install glusterfs-cli glusterfs-geo-replication glusterfs-fuse glusterfs-server glusterfs
+    wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-4.1.1-1.el7.x86_64.rpm
+    rpm -i glusterfs-4.1.1-1.el7.x86_64.rpm
+    wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-cli-4.1.1-1.el7.x86_64.rpm
+    rpm -i glusterfs-cli-4.1.1-1.el7.x86_64.rpm
+    wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-server-4.1.1-1.el7.x86_64.rpm
+    rpm -i glusterfs-server-4.1.1-1.el7.x86_64.rpm
+    wget --no-cache https://buildlogs.centos.org/centos/7/storage/x86_64/gluster-4.1/glusterfs-fuse-4.1.1-1.el7.x86_64.rpm
+    rpm -i glusterfs-fuse-4.1.1-1.el7.x86_64.rpm
+   
+    #mv glusterfs-epel.repo  /etc/yum.repos.d/
+    #yum -y update
+    #yum -y install glusterfs-cli glusterfs-geo-replication glusterfs-fuse glusterfs-server glusterfs
 }
 
 configure_gluster() {
