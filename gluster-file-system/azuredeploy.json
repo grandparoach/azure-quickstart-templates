@@ -189,23 +189,25 @@
           "https://raw.githubusercontent.com/grandparoach/azure-quickstart-templates/gluster/gluster-file-system/azuregfs.sh"
         ],
         "commandToExecute": "[concat('bash azuregfs.sh ')]"
-    },
-    "AvailabilitySetSettings": {
-        "name": "GlusterAVSet",
-        "faultDomainCount": "2",
-        "updateDomainCount": "5"
     }    
   },
   "resources": [
     {
-        "apiVersion": "2015-06-15",
         "type": "Microsoft.Compute/availabilitySets",
-        "name": "[variables('AvailabilitySetSettings').name]",
-        "location": "[resourceGroup().location]",
-        "properties": {
-          "platformFaultDomainCount": "[variables('AvailabilitySetSettings').faultDomainCount]",
-          "platformUpdateDomainCount": "[variables('AvailabilitySetSettings').updateDomainCount]"
-        }
+            "sku": {
+                "name": "Aligned"
+            },
+            "name": "GlusterAVSet",
+            "apiVersion": "2017-12-01",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "scale": null,
+            "properties": {
+                "platformUpdateDomainCount": 5,
+                "platformFaultDomainCount": 2,
+                "virtualMachines": []
+            },
+        "dependsOn": []
     },
     {
         "type": "Microsoft.Storage/storageAccounts",
@@ -254,11 +256,11 @@
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'), copyindex(1))]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('DiagSAName'))]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('AvailabilitySetSettings').name)]"
+        "[concat('Microsoft.Compute/availabilitySets/GlusterAVSet')]"
       ],
       "properties": {
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('AvailabilitySetSettings').name)]"
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', 'GlusterAVSet')]"
         },  
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
