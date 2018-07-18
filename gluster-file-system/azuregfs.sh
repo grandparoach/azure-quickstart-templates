@@ -169,9 +169,9 @@ install_glusterfs_centos() {
     if [ ! -e /etc/yum.repos.d/epel.repo ];
     then
         echo "Installing extra packages for enterprise linux"
-        wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
-        rpm -Uvh ./epel-release-latest-6*.rpm
-        rm ./epel-release-latest-6*.rpm
+        wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+        rpm -Uvh ./epel-release-latest-7*.rpm
+        rm ./epel-release-latest-7*.rpm
         yum -y update
     fi
     
