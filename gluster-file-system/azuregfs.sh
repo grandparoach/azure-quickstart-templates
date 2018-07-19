@@ -14,9 +14,14 @@ PEERNODEPREFIX=${1}
 VOLUMENAME=${2}
 NODEINDEX=${3}
 NODECOUNT=${4}
+PVSIZE=${5}
 
 MOUNTPOINT="/datadrive"
 RAIDCHUNKSIZE=128
+
+VGNAME="rhgs-data"
+LVNAME="brickpool"
+LVPARTITION="brick1"
 
 RAIDDISK="/dev/md127"
 RAIDPARTITION="/dev/md127p1"
@@ -54,6 +59,19 @@ create_raid0_centos() {
     yes | mdadm --create "$RAIDDISK" --name=data --level=0 --chunk="$RAIDCHUNKSIZE" --raid-devices="$DISKCOUNT" "${DISKS[@]}"
     mdadm --detail --verbose --scan > /etc/mdadm.conf
 }
+
+do_LVM_partition() {
+    
+    pvcreate --dataalignment 1024K ${1}
+    vgcreate --physicalextentsize 256K ${VGNAME} ${1}
+    lvcreate -L ${PVSIZE} -T ${VGNAME}/${LVNAME} -c 256K 
+    lvchange --zero n ${VGNAME}/${LVNAME} 
+    lvcreate -V ${PVSIZE} -T ${VGNAME}/${LVNAME} -n ${LVPARTITION} 
+    
+
+}
+
+
 
 do_partition() {
 # This function creates one (1) primary partition on the
@@ -109,8 +127,11 @@ configure_disks() {
         
             create_raid0_centos
         
-        do_partition ${RAIDDISK}
-        PARTITION="${RAIDPARTITION}"
+        do_LVM_partition ${RAIDDISK}
+        PARTITION="/dev/${VGNAME}/${LVPARTITION}"
+        
+        #do_partition ${RAIDDISK}
+        #PARTITION="${RAIDPARTITION}"
     else
         DISK="${DISKS[0]}"
         do_partition ${DISK}
@@ -118,12 +139,17 @@ configure_disks() {
     fi
 
     echo "Creating filesystem on ${PARTITION}."
-    mkfs -t ext4 ${PARTITION}
-    mkdir "${MOUNTPOINT}"
-    read UUID FS_TYPE < <(blkid -u filesystem ${PARTITION}|awk -F "[= ]" '{print $3" "$5}'|tr -d "\"")
-    add_to_fstab "${UUID}" "${MOUNTPOINT}"
+    mkfs.xfs -f -K -i size=512 -n size=8192 ${PARTITION}  
+    #mkfs -t ext4 ${PARTITION}
+    mkdir -p "${MOUNTPOINT}"
+
+    #read UUID FS_TYPE < <(blkid -u filesystem ${PARTITION}|awk -F "[= ]" '{print $3" "$5}'|tr -d "\"")
+    #add_to_fstab "${UUID}" "${MOUNTPOINT}"
+    echo -e "${PARTITION}\t${MOUNTPOINT}\txfs\ tdefaults,inode64,nobarrier, noatime,nouuid 0 2" | tee -a /etc/fstab 
+    
     echo "Mounting disk ${PARTITION} on ${MOUNTPOINT}"
-    mount "${MOUNTPOINT}"
+    #mount "${MOUNTPOINT}"
+    mount -a && mount 
 }
 
 open_ports() {
@@ -261,12 +287,22 @@ configure_gluster() {
         let retry--
     done
 
-    gluster volume create ${VOLUMENAME} rep 2 transport tcp ${allNodes} 2>> /tmp/error << EOF
+    gluster volume create ${VOLUMENAME} repl-vol replica 2 transport tcp ${allNodes} 2>> /tmp/error << EOF
 y
 EOF
     
     gluster volume info 2>> /tmp/error
     gluster volume start ${VOLUMENAME} 2>> /tmp/error
+
+    #Tune for small file improvements
+    gluster volume set ${VOLUMENAME} features.cache-invalidation on
+    gluster volume set ${VOLUMENAME} features.cache-invalidation-timeout 600
+    gluster volume set ${VOLUMENAME} performance.stat-prefetch on
+    gluster volume set ${VOLUMENAME} performance.cache-samba-metadata on
+    gluster volume set ${VOLUMENAME} performance.cache-invalidation on
+    gluster volume set ${VOLUMENAME} performance.md-cache-timeout 600
+    gluster volume set ${VOLUMENAME} network.inode-lru-limit: 90000
+
 }
 
 allow_passwordssh() {
@@ -291,6 +327,3 @@ allow_passwordssh
     configure_network
     configure_disks
     configure_gluster
-
-
-
