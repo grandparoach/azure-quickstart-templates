@@ -189,7 +189,9 @@
           "https://raw.githubusercontent.com/grandparoach/azure-quickstart-templates/gluster/gluster-file-system/azuregfs.sh"
         ],
         "commandToExecute": "[concat('bash azuregfs.sh ')]"
-    } 
+    },
+    "RAIDSize": "[mul(parameters('nbDataDisks'), parameters('dataDiskSize'))]",
+    "PVdiskSize": "[concat(sub(variables('RAIDSize'), div(variables('RAIDSize'), 40)),'G')]" 
   },
   "resources": [
     {
@@ -328,7 +330,7 @@
             "fileUris": "[variables('glusterScripts').scriptsToDownload]"
           },
           "protectedSettings": {
-            "commandToExecute": "[concat('bash azuregfs.sh ', parameters('vmNamePrefix'), ' ', parameters('volumeName'), ' ', copyindex(1), ' ', parameters('scaleNumber'))]"  
+            "commandToExecute": "[concat('bash azuregfs.sh ', parameters('vmNamePrefix'), ' ', parameters('volumeName'), ' ', copyindex(1), ' ', parameters('scaleNumber'), ' ', variables('PVdiskSize'))]"  
         }
       }
     },
@@ -350,7 +352,7 @@
             "fileUris": "[variables('glusterScripts').scriptsToDownload]"
           },
           "protectedSettings": {
-            "commandToExecute": "[concat('bash azuregfs.sh ', parameters('vmNamePrefix'), ' ', parameters('volumeName'), ' ', parameters('scaleNumber'), ' ', parameters('scaleNumber'))]"  
+            "commandToExecute": "[concat('bash azuregfs.sh ', parameters('vmNamePrefix'), ' ', parameters('volumeName'), ' ', parameters('scaleNumber'), ' ', parameters('scaleNumber'), ' ', variables('PVdiskSize'))]"  
         }
       }
     }
