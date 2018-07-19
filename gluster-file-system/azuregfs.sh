@@ -301,7 +301,7 @@ EOF
     gluster volume set ${VOLUMENAME} performance.cache-samba-metadata on
     gluster volume set ${VOLUMENAME} performance.cache-invalidation on
     gluster volume set ${VOLUMENAME} performance.md-cache-timeout 600
-    gluster volume set ${VOLUMENAME} network.inode-lru-limit: 90000
+    gluster volume set ${VOLUMENAME} network.inode-lru-limit 90000
 
 }
 
