@@ -287,7 +287,7 @@ configure_gluster() {
         let retry--
     done
 
-    gluster volume create ${VOLUMENAME} repl-vol replica 2 transport tcp ${allNodes} 2>> /tmp/error << EOF
+    gluster volume create ${VOLUMENAME} replica 2 transport tcp ${allNodes} 2>> /tmp/error << EOF
 y
 EOF
     
@@ -327,4 +327,5 @@ allow_passwordssh
     configure_network
     configure_disks
     configure_gluster
+
 
