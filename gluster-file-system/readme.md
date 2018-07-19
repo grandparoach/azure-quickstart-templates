@@ -2,4 +2,4 @@
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
-This template lets you create a N node Gluster File System on CentOS 6.5. Using the loop feature of ARM template, you can provision 2, 4, 6 or 8 nodes in a cluster with a replication factor of 2. Each node has a public IP and has 2 disks stripped into raid0.
+This template lets you create an N node Gluster File System on CentOS 7.4. You can provision 2, 4, 6 or 8 nodes in a cluster with a replication factor of 2. These machines will be placed into the same Availability Set.  There are no public IP addresses, so it must be installed onto an existing Virtual Network.  The number and size of the attached disks are specified as input parameters.  The attached disks will be striped into a RAID0 file system.  NFS is disabled, so all the clients must use the gluster native fuse client to access the file system.
