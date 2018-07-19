@@ -145,7 +145,7 @@ configure_disks() {
 
     #read UUID FS_TYPE < <(blkid -u filesystem ${PARTITION}|awk -F "[= ]" '{print $3" "$5}'|tr -d "\"")
     #add_to_fstab "${UUID}" "${MOUNTPOINT}"
-    echo -e "${PARTITION}\t${MOUNTPOINT}\txfs\ tdefaults,inode64,nobarrier, noatime,nouuid 0 2" | tee -a /etc/fstab 
+    echo -e "${PARTITION}\t${MOUNTPOINT}\txfs tdefaults,inode64,nobarrier, noatime,nouuid 0 2"  | sudo tee -a /etc/fstab 
     
     echo "Mounting disk ${PARTITION} on ${MOUNTPOINT}"
     #mount "${MOUNTPOINT}"
@@ -327,3 +327,4 @@ allow_passwordssh
     configure_network
     configure_disks
     configure_gluster
+
