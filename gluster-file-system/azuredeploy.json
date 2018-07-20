@@ -2,6 +2,13 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "westus2",
+      "metadata": {
+        "description": "azure region for deployment"
+      }
+    },
     "hostOs": {
       "type": "string",
       "defaultValue": "CentOS_7.4",
@@ -201,7 +208,7 @@
             },
             "name": "GlusterAVSet",
             "apiVersion": "2017-12-01",
-            "location": "[resourceGroup().location]",
+            "location": "[parameters('location')]",
             "tags": {},
             "scale": null,
             "properties": {
@@ -214,7 +221,7 @@
     {
         "type": "Microsoft.Storage/storageAccounts",
         "name": "[variables('DiagSAName')]",
-        "location": "[resourceGroup().location]",
+        "location": "[parameters('location')]",
         "apiVersion": "2015-06-15",
         "properties": {
           "accountType": "Standard_LRS"
@@ -224,7 +231,7 @@
       "apiVersion": "2018-04-01",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(variables('nicName'), copyindex(1))]",
-      "location": "[resourceGroup().location]",
+      "location": "[parameters('location')]",
       "copy": {
         "name": "gfs",
         "count": "[parameters('scaleNumber')]"
@@ -250,7 +257,7 @@
       "apiVersion": "2017-03-30",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(parameters('vmNamePrefix'), copyindex(1))]",
-      "location": "[resourceGroup().location]",
+      "location": "[parameters('location')]",
       "copy": {
         "name": "gfs",
         "count": "[parameters('scaleNumber')]"
@@ -313,7 +320,7 @@
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('vmNamePrefix'), copyindex(1), '/extension')]",
       "apiVersion": "2015-06-15",
-      "location": "[resourceGroup().location]",
+      "location": "[parameters('location')]",
       "copy": {
         "name": "gfs-extention",
         "count": "[sub(parameters('scaleNumber'),1)]"
@@ -338,7 +345,7 @@
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('vmNamePrefix'), parameters('scaleNumber'), '/extension')]",
       "apiVersion": "2015-06-15",
-      "location": "[resourceGroup().location]",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'), parameters('scaleNumber'))]",
         "gfs-extention"
