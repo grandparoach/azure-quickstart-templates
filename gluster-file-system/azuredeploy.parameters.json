@@ -14,7 +14,7 @@
     "existingSubnetName": {
       "value": "default"
     },
-    "adminUserName": {
+    "adminUsername": {
       "value": "sroach"
     },
     "adminPassword": {
