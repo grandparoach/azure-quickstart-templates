@@ -6,7 +6,9 @@ This template lets you create an N node Gluster File System on CentOS 7.4. You c
 
 The settings for these servers have been adopted from the guidance mentioned in this eBook  https://azure.microsoft.com/mediahandler/files/resourcefiles/parallel-virtual-file-systems-on-microsoft-azure/Parallel_Virtual_File_Systems_on_Microsoft_Azure.pdf 
 
+
 This link will deploy a cluster of client machines for testing the gluster servers performance.
+
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fgrandparoach%2Fazure-quickstart-templates%2Fgluster%2Fgluster-file-system%2Fgluster_client.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
