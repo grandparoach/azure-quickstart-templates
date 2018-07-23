@@ -28,21 +28,18 @@
     },
     "existingVNetName": {
       "type": "string",
-      "defaultValue": "westus2VNet",
       "metadata": {
         "description": "name of existing Virtual Network"
       }
     },
     "existingVNetResourceGroup": {
       "type": "string",
-      "defaultValue": "westus2",
       "metadata": {
         "description": "name of Resource Group for existing Virtual Network"
       }
     },
     "existingSubnetName": {
       "type": "string",
-      "defaultValue": "default",
       "metadata": {
         "description": "name of existing Virtual Network"
       }
