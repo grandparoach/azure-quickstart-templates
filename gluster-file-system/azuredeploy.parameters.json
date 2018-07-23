@@ -2,23 +2,38 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "storageAccountName": {
-      "value": "uniqueStorageAccount"
+    "scaleNumber": {
+      "value": 4
     },
-    "virtualNetworkName": {
-      "value": "testVnet"
+    "existingVNetName": {
+      "value": "westus2VNet"
     },
-    "location": {
-      "value": "West Europe"
+    "existingVNetResourceGroup": {
+        "value": "westus2"
+    },
+    "existingSubnetName": {
+      "value": "default"
     },
     "adminUserName": {
-      "value": "username"
+      "value": "sroach"
     },
     "adminPassword": {
       "value": "password"
     },
     "vmNamePrefix": {
-      "value": "testVM"
+      "value": "LSFglusterVM"
+    },
+    "vmSize": {
+      "value": "Standard_E8s_v3"
+    },
+    "dataDiskSize": {
+      "value": 128
+    },
+    "nbDataDisks": {
+      "value": 4
+    },
+    "volumeName": {
+      "value": "gfsvol"
     }
   }
 }
