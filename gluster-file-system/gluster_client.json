@@ -1,0 +1,331 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ClusterPrefix": {
+      "type": "string",
+      "defaultValue": "cluster",
+      "metadata": {
+        "description": "The name of the cluster nodes"
+      }
+    },
+    "ClientNodeVMsku": {
+      "type": "string",
+      "defaultValue": "Standard_D8s_v3",
+      "allowedValues": [
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2",
+        "Standard_DS11_v2",
+        "Standard_DS12_v2",
+        "Standard_DS13_v2",
+        "Standard_DS14_v2",
+        "Standard_DS15_v2",
+        
+        "Standard_D8s_v3",
+        "Standard_D16s_v3",
+        "Standard_D32s_v3",
+        "Standard_D64s_v3",
+    
+        "Standard_E8s_v3",
+        "Standard_E16s_v3",
+        "Standard_E32s_v3",
+        "Standard_E64s_v3",
+      
+        "Standard_F8s_v2",
+        "Standard_F16s_v2",
+        "Standard_F32s_v2",
+        "Standard_F64s_v2"
+      ],
+      "metadata": {
+        "description": "Instance type to use for the client nodes"
+      }
+    },
+    "LoginVMsku": {
+      "type": "string",
+      "defaultValue": "Standard_F8",
+      "allowedValues": [
+        "Standard_F4",
+        "Standard_F8",
+        "Standard_F16"
+      ],
+      "metadata": {
+        "description": "sku to use for the NIS Server VM"
+      }
+    },
+    "clientNodeCount": {
+      "type": "int",
+      "metadata": {
+        "description": "Number of VM instances for Client Node Scaleset (100 or less)."
+      },
+      "defaultValue": 8,
+      "maxValue": 100
+    },
+    "adminUserName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "User name for the Virtual Machine."
+      }
+    },
+    "authenticationType": {
+      "type": "string",
+      "defaultValue": "password",
+      "allowedValues": [
+        "password",
+        "sshPublicKey"
+      ],
+      "metadata": {
+        "description": "Authentication type for the virtual machines"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Admin password for the virtual machines"
+      }
+    },
+    "sshPublicKey": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "SSH public key that will be included on all nodes. The OpenSSH public key can be generated with tools like ssh-keygen on Linux or OS X."
+      }
+    },
+    "existingVNetName": {
+      "type": "string",
+      "defaultValue": "westus2VNet",
+      "metadata": {
+        "description": "name of existing Virtual Network"
+      }
+    },
+    "existingVNetResourceGroup": {
+      "type": "string",
+       "defaultValue": "westus2",
+      "metadata": {
+        "description": "name of Resource Group for existing Virtual Network"
+      }
+    },
+    "existingSubnetName": {
+      "type": "string",
+      "defaultValue": "default",
+      "metadata": {
+        "description": "name of existing Virtual Network"
+      }
+    },
+    "GlusterServerPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "VM name prefix, a number will be appended for each node"
+      }
+    },
+    "NumberofGlusterServers": {
+      "type": "int",
+      "defaultValue": 4,
+      "allowedValues": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "metadata": {
+        "description": "Number of nodes in the gluster file system"
+      }
+    },
+    "GlusterVolumeName": {
+      "type": "string",
+      "defaultValue": "gfsvol",
+      "metadata": {
+        "description": "Gluster file system volume name"
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "vnetID": "[resourceId(parameters('existingVNetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('existingVNetName'))]",
+    "SubnetRef": "[concat(variables('vnetID'),'/subnets/', parameters('existingSubnetName'))]",
+    "LoginName": "loginserver",
+    "LoginIPConfigName": "[concat(variables('loginName'), 'ipconfig')]",
+    "NodeipConfigName": "[concat(parameters('ClusterPrefix'), 'ipconfig')]",
+    "LoginNicName": "[concat(variables('loginName'), 'nic')]",
+    "NodenicName": "[concat(parameters('ClusterPrefix'), 'nic')]",
+    "publicIPAddressName": "[concat(variables('LoginName'), 'pip')]",
+    "clientNodeimageReference": "[variables('Images')['CentOS_7.4']]",
+    "sshKeyPath": "[concat('/home/',parameters('adminUserName'),'/.ssh/authorized_keys')]",
+    "Images": {
+      "CentOS_7.4": {
+        "publisher": "OpenLogic",
+        "offer": "CentOS",
+        "sku": "7.4",
+        "version": "latest"
+      }
+    },
+    "linuxConfiguration_sshPublicKey": {
+      "disablePasswordAuthentication": "true",
+      "ssh": {
+        "publicKeys": [
+          {
+            "path": "[variables('sshKeyPath')]",
+            "keyData": "[parameters('sshPublicKey')]"
+          }
+        ]
+      }
+    },
+    "linuxConfiguration_password": { },
+    "linuxConfiguration": "[variables(concat('linuxConfiguration_',parameters('authenticationType')))]",
+    "vmScripts": {
+      "scriptsToDownload": [
+        "https://raw.githubusercontent.com/grandparoach/azure-quickstart-templates/gluster/gluster-file-system/gfsclient.sh"  
+      ],
+      "commandToExecute": "[concat('bash gfsclient.sh ', parameters('GlusterServerPrefix'), ' ', parameters('NumberofGlusterServers'), ' ', parameters('GlusterVolumeName'))]"
+    }
+  },  
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[variables('location')]",
+      "apiVersion": "2016-03-30",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('LoginNicName')]",
+      "location": "[variables('location')]",
+      "apiVersion": "2018-04-01",
+      "dependsOn": [ 
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[variables('LoginIPConfigName')]",
+            "properties":  {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              }, 
+              "subnet": {
+                "id": "[variables('SubnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('LoginName')]",
+      "location": "[variables('location')]",
+      "apiVersion": "2017-03-30",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkinterfaces/', variables('LoginNicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('LoginVMsku')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('LoginName')]",
+          "adminUsername": "[parameters('adminUserName')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "linuxConfiguration": "[variables('linuxConfiguration')]"
+        },
+        "storageProfile": {
+          "imageReference": "[variables('clientNodeimageReference')]",
+          "osDisk": {
+            "caching": "ReadOnly",
+            "createOption": "FromImage",
+             "managedDisk": {
+                "storageAccountType": "Premium_LRS"
+             }
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+               "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('LoginNicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+        "type": "Microsoft.Compute/virtualMachineScaleSets",
+        "name": "[parameters('ClusterPrefix')]",
+        "location": "[variables('location')]",
+        "apiVersion": "2017-12-01",
+        "sku": {
+          "name": "[parameters('ClientNodeVMsku')]",
+          "tier": "Standard",
+          "capacity": "[parameters('clientNodeCount')]"
+        },
+        "dependsOn": [ ],
+        "properties": {
+          "overprovision": false,
+          "upgradePolicy": {
+            "mode": "Manual"
+          },
+          "virtualMachineProfile": {
+            "networkProfile": {
+              "networkInterfaceConfigurations": [
+                {
+                  "name": "[variables('NodenicName')]",
+                  "properties": {
+                    "primary": true,
+                    "enableAcceleratedNetworking": true,
+                    "ipConfigurations": [
+                      {
+                        "name": "[variables('NodeipConfigName')]",
+                        "properties": {
+                          "subnet": {
+                              "id": "[variables('SubnetRef')]"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "osProfile": {
+              "computerNamePrefix": "[parameters('clusterPrefix')]",
+              "adminUsername": "[parameters('adminUserName')]",
+              "adminPassword": "[parameters('adminPassword')]",
+              "linuxConfiguration": "[variables('linuxConfiguration')]"
+            },
+            "storageProfile": {
+              "imageReference": "[variables('clientNodeimageReference')]",  
+              "osDisk": {
+                "caching": "ReadOnly",
+                "createOption": "FromImage",
+                "managedDisk": {
+                  "storageAccountType": "Premium_LRS"
+              }
+            }
+          },
+          "extensionProfile": {
+            "extensions": [
+              {
+                "name": "PostInstallScript",
+                "properties": {
+                  "publisher": "Microsoft.Azure.Extensions",
+                  "type": "CustomScript",
+                  "typeHandlerVersion": "2.0",
+                  "autoUpgradeMinorVersion": true,
+                  "settings": {
+                    "fileUris": "[variables('vmScripts').scriptsToDownload]",
+                    "commandToExecute": "[variables('vmScripts').commandToExecute]"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
