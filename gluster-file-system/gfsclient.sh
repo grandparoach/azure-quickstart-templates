@@ -36,8 +36,46 @@ done
 
 mount -t glusterfs -o backup-volfile-servers=${backupNodes} ${GLUSTERHOSTPREFIX}${GLUSTERHOSTCOUNT}:/${GLUSTERVOLUME} ${MOUNTPOINT}
 
-LINE=${GLUSTERHOSTPREFIX}${GLUSTERHOSTCOUNT}:/${GLUSTERVOLUME}\t${MOUNTPOINT}\tglusterfs\tdefaults,backup-volfile-servers=${backupNodes}      0 0    
+LINE="${GLUSTERHOSTPREFIX}${GLUSTERHOSTCOUNT}:/${GLUSTERVOLUME} ${MOUNTPOINT} glusterfs defaults,backup-volfile-servers=${backupNodes} 0 0"    
 echo -e "${LINE}" >> /etc/fstab
+
+# Install performance test tools
+
+yum -y install gcc gcc-gfortran gcc-c++
+mkdir /glustre/software
+cd /glustre/software/
+wget http://www.mpich.org/static/downloads/3.1.4/mpich-3.1.4.tar.gz
+tar xzf mpich-3.1.4.tar.gz
+cd mpich-3.1.4
+./configure --prefix=/glustre/software/mpich3/
+make
+make install 
+
+# Update environment variables
+
+export PATH=/glustre/software/mpich3/bin:$PATH
+export LD_LIBRARY_PATH=/glustre/software/mpich3/lib:${LD_LIBRARY_PATH}
+
+# Compile IOR
+
+cd /glustre/software/
+yum -y install git automake
+git clone https://github.com/chaos/ior.git
+mv ior ior_src
+cd ior_src/
+./bootstrap
+./configure --prefix=/glustre/software/ior/
+make
+make install
+
+# Compile and install MDTest
+
+cd /glustre/software/
+git clone https://github.com/MDTEST-LANL/mdtest.git
+cd mdtest
+export MPI_CC=mpicc
+make
+
 
 # disable selinux
 sed -i 's/^SELINUX=.*/SELINUX=disabled/I' /etc/selinux/config
